@@ -33,5 +33,3 @@ def proxy(path):
 
     return Response(resp.content, resp.status_code, response_headers)
 
-if __name__ == "__main__":
-    app.run()
