@@ -3,17 +3,30 @@ import requests
 from urllib.parse import urljoin, urlparse
 
 app = Flask(__name__)
+
+# رابط الهدف
 TARGET = "https://past-pinniped-uuuuuu7gco-5c3491b7.koyeb.app/"
+
+# دالة للطباعة
 def g(k):
     print(k)
-    
+
 @app.route('/', defaults={'path': ''}, methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
 @app.route('/<path:path>', methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
 def proxy(path):
     url = f"{TARGET}/{path}"
-    g(url)
+    g(f"Request URL: {url}")
+    
+    # نسخ رؤوس الطلب بدون Host
     headers = {k: v for k, v in request.headers if k.lower() != 'host'}
+    g(f"Request Headers: {headers}")
+    
+    # قراءة جسم الطلب إذا لم يكن GET أو HEAD
     body = request.get_data() if request.method not in ["GET", "HEAD"] else None
+    if body:
+        g(f"Request Body: {body}")
+    
+    # إرسال الطلب للـ TARGET
     resp = requests.request(
         method=request.method,
         url=url,
@@ -23,16 +36,6 @@ def proxy(path):
         allow_redirects=False
     )
 
-    excluded_headers = ['transfer-encoding', 'connection']
-    response_headers = []
-    for name, value in resp.headers.items():
-        if name.lower() not in excluded_headers:
-            if name.lower() == "location":
-                parsed = urlparse(value)
-                new_location = urljoin(request.host_url, parsed.path.lstrip("/"))
-                response_headers.append((name, new_location))
-            else:
-                response_headers.append((name, value))
-
-    return Response(resp.content, resp.status_code, response_headers)
-
+    g(f"Response Status: {resp.status_code}")
+    g(f"Response Headers: {dict(resp.headers)}")
+    g(f"Response Body (first 500 bytes): {resp.content[:500]}
