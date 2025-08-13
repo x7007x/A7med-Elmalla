@@ -3,7 +3,7 @@ import requests
 from urllib.parse import urljoin, urlparse
 
 app = Flask(__name__)
-TARGET = "https://brave-terese-uuuuuu7gco-4c4942e9.koyeb.app"
+TARGET = "https://past-pinniped-uuuuuu7gco-5c3491b7.koyeb.app"
 
 @app.route('/', defaults={'path': ''}, methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
 @app.route('/<path:path>', methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
