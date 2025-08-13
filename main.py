@@ -1,5 +1,6 @@
 from flask import Flask, request, Response
 import requests
+from urllib.parse import urljoin, urlparse
 
 app = Flask(__name__)
 TARGET = "https://brave-terese-uuuuuu7gco-4c4942e9.koyeb.app"
@@ -18,6 +19,19 @@ def proxy(path):
         cookies=request.cookies,
         allow_redirects=False
     )
+
     excluded_headers = ['transfer-encoding', 'connection']
-    response_headers = [(name, value) for name, value in resp.headers.items() if name.lower() not in excluded_headers]
+    response_headers = []
+    for name, value in resp.headers.items():
+        if name.lower() not in excluded_headers:
+            if name.lower() == "location":
+                parsed = urlparse(value)
+                new_location = urljoin(request.host_url, parsed.path.lstrip("/"))
+                response_headers.append((name, new_location))
+            else:
+                response_headers.append((name, value))
+
     return Response(resp.content, resp.status_code, response_headers)
+
+if __name__ == "__main__":
+    app.run()
