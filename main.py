@@ -4,11 +4,14 @@ from urllib.parse import urljoin, urlparse
 
 app = Flask(__name__)
 TARGET = "https://past-pinniped-uuuuuu7gco-5c3491b7.koyeb.app/"
-
+def g(k):
+    print(k)
+    
 @app.route('/', defaults={'path': ''}, methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
 @app.route('/<path:path>', methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
 def proxy(path):
     url = f"{TARGET}/{path}"
+    g(url)
     headers = {k: v for k, v in request.headers if k.lower() != 'host'}
     body = request.get_data() if request.method not in ["GET", "HEAD"] else None
     resp = requests.request(
