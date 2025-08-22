@@ -1,4 +1,4 @@
-from flask import Flask, request, Response
+from flask import Flask, request, Response, stream_with_context
 import requests
 from urllib.parse import urljoin, urlparse
 import mimetypes
@@ -20,10 +20,11 @@ def proxy(path):
         headers=headers,
         data=body,
         cookies=request.cookies,
-        allow_redirects=False
+        allow_redirects=False,
+        stream=True
     )
 
-    excluded_headers = ['transfer-encoding', 'connection']
+    excluded_headers = ['transfer-encoding', 'connection', 'content-encoding']
     response_headers = []
     for name, value in resp.headers.items():
         if name.lower() not in excluded_headers:
@@ -32,7 +33,7 @@ def proxy(path):
                 new_location = urljoin(request.host_url, parsed.path.lstrip("/"))
                 response_headers.append((name, new_location))
             elif name.lower() == "content-disposition":
-                response_headers.append(("Content-Disposition", "inline"))
+                continue  # نتجاهل الـ attachment
             else:
                 response_headers.append((name, value))
 
@@ -44,7 +45,11 @@ def proxy(path):
     if path.startswith("static/fonts/"):
         response_headers.append(("Cache-Control", "public, max-age=31536000"))
 
-    return Response(resp.content, resp.status_code, response_headers)
+    return Response(
+        stream_with_context(resp.iter_content(chunk_size=8192)),
+        status=resp.status_code,
+        headers=response_headers
+    )
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
