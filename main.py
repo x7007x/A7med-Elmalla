@@ -1,6 +1,7 @@
 from flask import Flask, request, Response
 import requests
 from urllib.parse import urljoin, urlparse
+import mimetypes
 
 app = Flask(__name__)
 
@@ -33,6 +34,13 @@ def proxy(path):
                 response_headers.append((name, new_location))
             else:
                 response_headers.append((name, value))
+
+    # --- إصلاح MIME TYPE لو ناقص ---
+    guessed_type, _ = mimetypes.guess_type(path)
+    if guessed_type:
+        # شيّل أي Content-Type موجود من السيرفر الأصلي
+        response_headers = [(n, v) for n, v in response_headers if n.lower() != "content-type"]
+        response_headers.append(("Content-Type", guessed_type))
 
     return Response(resp.content, resp.status_code, response_headers)
 
