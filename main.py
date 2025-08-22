@@ -41,6 +41,9 @@ def proxy(path):
         response_headers = [(n, v) for n, v in response_headers if n.lower() != "content-type"]
         response_headers.append(("Content-Type", guessed_type))
 
+    if path.startswith("static/fonts/"):
+        response_headers.append(("Cache-Control", "public, max-age=31536000"))
+
     return Response(resp.content, resp.status_code, response_headers)
 
 if __name__ == "__main__":
