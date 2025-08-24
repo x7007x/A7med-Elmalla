@@ -16,12 +16,11 @@ def proxy(path):
         params=request.args,
         data=request.get_data(),
         cookies=request.cookies,
-        allow_redirects=False,
-        stream=True
+        allow_redirects=False
     )
     excluded = {'content-encoding', 'content-length', 'transfer-encoding', 'connection'}
     headers_out = [(k, v) for k, v in resp.raw.headers.items() if k.lower() not in excluded]
-    return Response(resp.iter_content(chunk_size=8192), resp.status_code, headers_out)
+    return Response(resp.content, resp.status_code, headers_out)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, threaded=True)
