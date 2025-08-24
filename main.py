@@ -8,7 +8,7 @@ TARGET = "https://past-pinniped-uuuuuu7gco-5c3491b7.koyeb.app/"
 @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
 def proxy(path):
     url = TARGET.rstrip('/') + '/' + path.lstrip('/')
-    headers = {k: v for k, v in request.headers if k.lower() != 'host'}
+    headers = {k: v for k, v in request.headers.items() if k.lower() != 'host'}
     resp = requests.request(
         method=request.method,
         url=url,
@@ -21,7 +21,7 @@ def proxy(path):
     )
     excluded = {'content-encoding', 'content-length', 'transfer-encoding', 'connection'}
     headers_out = [(k, v) for k, v in resp.raw.headers.items() if k.lower() not in excluded]
-    return Response(resp.content, resp.status_code, headers_out)
+    return Response(resp.iter_content(chunk_size=8192), resp.status_code, headers_out)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, threaded=True)
