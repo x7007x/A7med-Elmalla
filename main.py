@@ -31,7 +31,7 @@ def proxy(path):
             data=body,
             cookies=request.cookies,
             allow_redirects=False,
-            stream=True,
+            #stream=True,
             timeout=60
         )
 
